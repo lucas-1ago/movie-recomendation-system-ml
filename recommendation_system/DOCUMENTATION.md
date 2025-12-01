@@ -7,13 +7,14 @@
 ## Índice
 
 1. [Visão Geral](#1-visão-geral)
-2. [Dataset](#2-dataset)
-3. [Pré-processamento dos Dados](#3-pré-processamento-dos-dados)
-4. [Sistema de Recomendação](#4-sistema-de-recomendação)
-5. [Técnicas de Otimização](#5-técnicas-de-otimização)
-6. [Avaliação do Modelo](#6-avaliação-do-modelo)
-7. [Resultados](#7-resultados)
-8. [Fluxo Completo](#8-fluxo-completo)
+2. [Como Executar](#2-como-executar)
+3. [Dataset](#3-dataset)
+4. [Pré-processamento dos Dados](#4-pré-processamento-dos-dados)
+5. [Sistema de Recomendação](#5-sistema-de-recomendação)
+6. [Técnicas de Otimização](#6-técnicas-de-otimização)
+7. [Avaliação do Modelo](#7-avaliação-do-modelo)
+8. [Resultados](#8-resultados)
+9. [Fluxo Completo](#9-fluxo-completo)
 
 ---
 
@@ -36,6 +37,8 @@ Dado um conjunto de avaliações de filmes feitas por críticos, o sistema é ca
 | **NumPy** | Operações numéricas e matriciais |
 | **Scikit-learn** | Cálculo de Cosine Similarity |
 | **Matplotlib/Seaborn** | Visualizações e gráficos |
+| **Gradio** | Interface web interativa |
+| **Joblib** | Persistência do modelo treinado |
 
 ### Tipo de Machine Learning
 
@@ -48,7 +51,65 @@ Dado um conjunto de avaliações de filmes feitas por críticos, o sistema é ca
 
 ---
 
-## 2. Dataset
+## 2. Como Executar
+
+### Estrutura de Arquivos
+
+```
+recommendation_system/
+├── main.py       # Lógica principal e classe ItemItemRecommender
+├── metrics.py    # Cálculo de métricas e visualizações
+├── ui.py         # Interface Gradio
+└── DOCUMENTATION.md
+```
+
+### Instalação de Dependências
+
+```bash
+pip install pandas numpy scikit-learn matplotlib seaborn gradio joblib
+```
+
+### Modos de Execução
+
+| Comando | Descrição |
+|---------|-----------|
+| `python main.py` | Treina o modelo e calcula métricas (RMSE, MAE, etc.) |
+| `python main.py --save` | Treina, **salva o modelo** e calcula métricas |
+| `python main.py --load` | **Carrega modelo salvo** e calcula métricas (pula treinamento) |
+| `python main.py --ui` | Treina o modelo e inicia a interface web Gradio |
+| `python main.py --ui --save` | Treina, salva o modelo e inicia a interface web |
+| `python main.py --ui --load` | Carrega modelo salvo e inicia a interface web |
+| `python main.py --help` | Mostra ajuda com todas as opções |
+
+### Exemplos de Uso
+
+```bash
+# Primeira execução: treinar e salvar o modelo
+python main.py --save
+
+# Execuções posteriores: carregar modelo salvo (muito mais rápido!)
+python main.py --load
+
+# Iniciar interface web com modelo salvo
+python main.py --ui --load
+
+# Ver todas as opções
+python main.py --help
+```
+
+### Persistência do Modelo
+
+O modelo treinado é salvo em `data/recommender_model.joblib` e contém:
+- Matriz de similaridade entre filmes
+- Bias de usuários e itens
+- Metadados (IDs de filmes, títulos, etc.)
+- Data/hora do salvamento
+
+**Vantagem**: Carregar um modelo salvo leva ~2 segundos, enquanto treinar do zero leva ~2 minutos.
+
+---
+
+## 3. Dataset
 
 ### Fonte
 **Rotten Tomatoes Movie Reviews Dataset**
@@ -74,9 +135,9 @@ Críticos únicos: 15,510
 
 ---
 
-## 3. Pré-processamento dos Dados
+## 4. Pré-processamento dos Dados
 
-### 3.1 Padronização dos Scores
+### 4.1 Padronização dos Scores
 
 O dataset contém scores em diversos formatos que precisam ser normalizados para uma escala uniforme de **1 a 5**.
 
@@ -127,7 +188,7 @@ else:
     return 3.0  # Neutro
 ```
 
-### 3.2 Filtragem de Qualidade
+### 4.2 Filtragem de Qualidade
 
 Para melhorar a qualidade das recomendações, aplicamos **filtros iterativos** que removem usuários e filmes com poucos ratings.
 
@@ -195,7 +256,7 @@ usuario_5203          NaN      NaN      5.0   ...      4.0
 
 ---
 
-## 4. Sistema de Recomendação
+## 5. Sistema de Recomendação
 
 ### 4.1 Item-Item Collaborative Filtering
 
@@ -259,7 +320,7 @@ filme_3         0.32     0.41     1.00  ...
 
 ---
 
-## 5. Técnicas de Otimização
+## 6. Técnicas de Otimização
 
 ### 5.1 k-Nearest Neighbors (k-NN)
 
@@ -390,7 +451,7 @@ def predict_rating(self, user_ratings, movie_id, user_id):
 
 ---
 
-## 6. Avaliação do Modelo
+## 7. Avaliação do Modelo
 
 ### 6.1 Metodologia: Hold-Out Validation
 
@@ -446,7 +507,7 @@ $$r = \frac{\sum(x - \bar{x})(y - \bar{y})}{\sqrt{\sum(x-\bar{x})^2}\sqrt{\sum(y
 
 ---
 
-## 7. Resultados
+## 8. Resultados
 
 ### 7.1 Evolução das Métricas
 
@@ -489,7 +550,7 @@ BIAS_ADJUSTMENT = True  # Ajuste de bias user/item
 
 ---
 
-## 8. Fluxo Completo
+## 9. Fluxo Completo
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
